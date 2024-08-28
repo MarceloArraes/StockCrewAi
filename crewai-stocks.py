@@ -11,8 +11,23 @@ from dotenv import load_dotenv
 
 import streamlit as st
 
-# In[ ]:
+def get_api_key():
+    # Try to load from .env file (for local development)
+    load_dotenv()
+    api_key = os.getenv('OPENAI_API_KEY')
+    
+    # If not found in .env, try to get from Streamlit secrets
+    if api_key is None:
+        try:
+            api_key = st.secrets['OPENAI_API_KEY']
+        except KeyError:
+            st.error("OPENAI_API_KEY not found in environment variables or Streamlit secrets.")
+            st.stop()
+    
+    return api_key
 
+
+# In[ ]:
 
 def fetch_stock_price(ticket):
     stock = yf.download(ticket, start="2023-08-08", end="2024-08-08")
@@ -27,7 +42,7 @@ yahoo_finance_tool = Tool(
 
 
 #import llm from openAi
-os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+os.environ['OPENAI_API_KEY'] = get_api_key()
 llm = ChatOpenAI(model="gpt-3.5-turbo")
 
 
